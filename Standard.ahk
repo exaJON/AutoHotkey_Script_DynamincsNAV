@@ -68,7 +68,7 @@
         }
     ; Vorn ran ein @* setzen
     clip := StrReplace(clip, "|", "|@*")
-    clip := @* + clip
+    clip := "@*" clip
     ; Zwischenablage neu setzen
     A_Clipboard := clip
     TrayTip "Neue Zwischenablage: " clip
