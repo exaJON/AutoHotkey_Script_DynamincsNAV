@@ -216,6 +216,7 @@ SearchString(search)
 	KeyWait "Enter"
 	KeyWait "Shift"
 	Sleep(50)
+	Send "{Home}"
 	SEND "^v"
 	
 }
