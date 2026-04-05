@@ -15,12 +15,15 @@ This repository contains AutoHotkey scripts designed specifically for the Navisi
 ### Hotkeys
 Hotkeys are key combinations that perform specific actions in the Navision development environment. Here are some of the key hotkeys:
 
+- **`CTRL + ALT + h`**: Opens this help documentation in a separate window.
 - **`CTRL + o`**: Opens options and navigates to the tenant selection.
 - **`CTRL + ALT + d`**: Adds a documentation trigger line and increments the numbering.
 - **`CTRL + g`**: Opens global variables.
 - **`CTRL + l`**: Opens local variables.
 - **`CTRL + #`**: Inserts a documentation section based on the user's initials.
 - **`CTRL + d`**: Copies the current line and pastes it below.
+- **`CTRL + /`**: Toggles comments (`//`) for the current line (Comment/Uncomment).
+- **`CTRL + SPACE`**: Opens the Field List via menu navigation (Alt + A, F).
 - **`CTRL + SHIFT + f`**: Searches using the term under the cursor.
 - **`CTRL + SHIFT + h`**: Searches and replaces using the term under the cursor.
 
@@ -29,9 +32,19 @@ Hotstrings are text shortcuts that automatically expand into longer commands or 
 
 - **`d#`**: Inserts today's date in the format `dd.MM.yyyy`.
 - **`vl#`**: Expands to `VALIDATE();` and positions the cursor inside the parentheses.
-- **`if#`**: Inserts an `IF` condition with placeholders.
+- **`tf#`**: Expands to `TESTFIELD();`.
+- **`if#`**: Inserts an `IF THEN BEGIN ... END;` block.
+- **`ff#` / `fl#`**: Inserts `FINDFIRST;` or `FINDLAST;`.
+- **`re#` / `un#`**: Creates a `REPEAT ... UNTIL` structure.
 - **`sr#`**: Expands to `SETRANGE();` and positions the cursor inside the parentheses.
+- **`sf#`**: Expands to `SETFILTER();`.
+- **`srr#`**: Performs a `RESET;` on the preceding variable and starts a `SETRANGE();`.
+- **`fs#`**: Generates a full `FINDSET ... REPEAT ... UNTIL` loop for the variable.
+- **`cs#`**: Inserts a `CASE ... OF ... END;` block.
+- **`m#`**: Creates a `MESSAGE` showing the value of the variable under the cursor.
+- **`//(`**: Inserts a documentation tag block with Begin/End markers.
 - **`doc#`**: Inserts a documentation trigger line based on the last version number in the clipboard.
+- **`ndoc#`**: Inserts a template for a completely new documentation header.
 
 ---
 
