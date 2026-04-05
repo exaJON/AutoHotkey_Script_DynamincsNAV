@@ -36,66 +36,24 @@ GetFirstLetter()
 }
 ShowHelp()
 {
-	MsgBox "
-  (
-    ###### Hotkeys für NAV Entwicklungsumgebung ######
-	
-CTRL + o	Optionen aufrufen, Springen auf 
-	Mandantenauswahl
-CTRL + ALT + d 	Dokumentationstrigger aus aktueller Zeile 
-	wird hochgezählt und darunter eine neue Zeile
-	angelegt. Es muss die vorherige 
-	Dokumentationsnummerierung markiert sein.
-CTRL + g	Globale Variablen aufrufen 
-CTRL + l	Lokale Variablen aufrufen 
-CTRL + # Dokumentationsbereich einfügen, 
-	erster Buchstabe des Anmeldenamens 3x
-	// jjj |
-CTRL + d Aktuelle Zeile kopieren
-CTRL + Shift + f	Suche mit Begriff unter Cursor füllen.
-	oder markierten Text als Suchbegriff
-CTRL + Shift + h	Suche und Ersetzen mit Begriff unter 
-	Cursor, oder markierten Text als Suchbegriff
+    HelpPath := A_ScriptDir "\README.md"
+    if !FileExist(HelpPath) {
+        MsgBox "Die Hilfedatei (README.md) wurde nicht im Verzeichnis gefunden.`n`nPfad: " HelpPath, "Fehler", "Icon!"
+        return
+    }
 
-################# Hot Strings #################
-Texte die hintereinander eingegeben werden. 
-wird ein Text erkannt wird er automatisch ersetzt. 
-Die Texte müssen für sich alleine stehen 
-oder können einen vorangestellten "." haben.
- | symbolisiert den Cursor nach Konvertierung des Strings
-
-begin	BEGIN|END;
-d#	Heutiges Datum dd.MM.yyyy
-vl#	VALIDATE(|);
-tf#	TESTFIELD(|);
-ff#	FINDFIRST;
-fl#	FINDLAST;
-if#	IF () THEN BEGIN
-				
-	END;
-re#	repeat;
-un#	Until |.next = 0;
-sr#	SETRANGE();
-sf#	SETFILTER(|);
-srr#	Es sollte eine Variable mit Punktvorangestellte sein.
-	res.srr#    rec.RESET;
-	rec.SETRANGE(|);
-//(	DokuTag eröffnen, mit erstem Buchstaben 
-	des Benutzertnamens
-	// jjj B
-	// jjj E
-fs#	rec.findset then repeat
-	until rec.next = 0;
-doc#	Doku-Triggerzeile, In Zwischenablage muss die 
-	letzte Versionsnummer sein.
-	2.00    P0XXX      JN  dd.MM.yyyy  |
-ndoc#	Hotstring für komplett neuen Doku-Trigger
-=====================================
-No.     Module  Name  Date       Description
-=====================================
-1.00    P0XXX       JN    dd.MM.yyyy |
-  )", "Hotkey Hilfe", "iconi"
-
+    HelpContent := FileRead(HelpPath, "UTF-8")
+    
+    ; GUI erstellen
+    HelpGui := Gui("+Resize +AlwaysOnTop", "Navision 2015 Entwicklungshilfe")
+    HelpGui.SetFont("s10", "Consolas") ; Monospaced Font für bessere Lesbarkeit von MD
+    
+    ; Edit-Control ist scrollbar und ReadOnly
+    EditCtrl := HelpGui.Add("Edit", "r30 w800 ReadOnly vHelpEdit", HelpContent)
+    
+    HelpGui.Add("Button", "Default w80", "Schließen").OnEvent("Click", (GuiObj, *) => GuiObj.Gui.Hide())
+    
+    HelpGui.Show()
 }
 ; Suchen oder Ersetzen mit Text unter dem gerade gesetzten Cursor
 SearchString(search)
@@ -138,7 +96,6 @@ SearchString(search)
 	Sleep(50)
 	SEND "^v"
 }
-
 ; ######################   Hotkeys für alles  #########################
 
 ^!h::ShowHelp()
@@ -148,6 +105,14 @@ SearchString(search)
 
 ;HotIfWinActive "ahk_class Finsql.exe" 
 #HotIf WinActive("ahk_exe finsql.exe")
+
+; CTRL + Space: Feldmenü über die Alt-Navigation aufrufen (Ansicht -> Feldliste)
+^Space::
+{
+	Send "!a" ; Öffnet Menü 'Ansicht'
+	Sleep 10
+	Send "f"  ; Wählt 'Feldliste'
+}
 
 ^+f::SearchString(true)
 ^+h::SearchString(false)
@@ -205,22 +170,55 @@ SearchString(search)
 ; CTRL + d Aktuelle Zeile kopieren
 ^d::
 {
-	KeyWait "Control" 
-	Send "{Home}"
+	A_Clipboard := ""
+	Send "{Home 2}"    ; Move to the absolute start (Column 0)
 	Send "+{END}"
 	Send "^c"
-	Clipwait(10)
-	Send "{END}"
-	SEND "{Enter}"
-	KeyWait "Control"
-	KeyWait "Enter"
-	KeyWait "Shift"
-	Sleep(50)
-	Send "{Home}"
-	SEND "^v"
-	
+	if !ClipWait(1)
+		return
+	Send "{End}{Enter}"
+	Send "{Home 2}"    ; Move to absolute start of new line to ignore IDE auto-indent
+	Send "^v"
 }
 
+; CTRL + /: Zeile kommentieren / auskommentieren (wie in VS Code)
+^/::
+{
+    A_Clipboard := ""
+    Send "{Home 2}+{End}^c"
+    if !ClipWait(0.5)
+        return
+    
+    line := A_Clipboard
+    ; Prüfen ob die Zeile mit // beginnt (führende Leerzeichen ignorieren)
+    if (RegExMatch(line, "^\s*//")) {
+        ; Kommentar entfernen
+        newLine := RegExReplace(line, "^(\s*)//\s?", "$1")
+    } else {
+        ; Kommentar hinzufügen
+        newLine := "// " . line
+    }
+    
+    A_Clipboard := newLine
+    Send "^v"
+}
+
+; ################## Zusätzliche Hotstrings #########################
+
+; Schnelles Case-Statement
+:*:cs#::CASE  OF{Enter}END;{Up}{End}{Left 3}
+
+; Smart Message: Erstellt MESSAGE('Variable: %1', Variable); aus dem Wort unter dem Cursor
+:O*:m#::
+{
+    A_Clipboard := ""
+    ; Wort links vom Cursor markieren und kopieren
+    Send "^{Left}^+{Right}^c"
+    if ClipWait(0.5) {
+        var := Trim(A_Clipboard, " `t`n`r.,;()")
+        Send "{End}{Enter}MESSAGE('" var ": \%1', " var ");"
+    }
+}
 
 
 ;################# Hot Strings #########################
