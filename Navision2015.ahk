@@ -174,25 +174,12 @@ SearchString(search)
 	Send "{Home 2}"    ; Move to the absolute start (Column 0)
 	Send "+{END}"
 	Send "^c"
-<<<<<<< HEAD
 	if !ClipWait(1)
 		return
 	Send "{End}{Enter}"
 	Send "{Home 2}"    ; Move to absolute start of new line to ignore IDE auto-indent
 	Send "^v"
-=======
-	Clipwait(10)
-	Send "{END}"
-	SEND "{Enter}"
-	KeyWait "Control"
-	KeyWait "Enter"
-	KeyWait "Shift"
-	Sleep(50)
-	Send "{Home}"
-	Sleep(50)
-	SEND "^v"
-	
->>>>>>> ec54537259ca06db9f09edb4ec821ae6f42484eb
+
 }
 
 ; CTRL + /: Zeile kommentieren / auskommentieren (wie in VS Code)
