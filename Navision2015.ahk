@@ -172,12 +172,11 @@ SearchString(search)
 {
 	A_Clipboard := ""
 	Send "{Home 2}"    ; Move to the absolute start (Column 0)
-	Send "+{END}"
+	Send "^a"
 	Send "^c"
 	if !ClipWait(1)
 		return
-	Send "{End}{Enter}"
-	Send "{Home 2}"    ; Move to absolute start of new line to ignore IDE auto-indent
+	Send "{DOWN}"
 	Send "^v"
 
 }
