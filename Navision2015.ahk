@@ -174,10 +174,13 @@ SearchString(search)
 	Send "{Home 2}"    ; Move to the absolute start (Column 0)
 	Send "^a"
 	Send "^c"
-	if !ClipWait(1)
+	if !ClipWait(2)
 		return
+	KeyWait "d" 
 	Send "{DOWN}"
+	Sleep 150
 	Send "^v"
+	Sleep 50
 
 }
 
